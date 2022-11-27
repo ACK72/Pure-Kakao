@@ -43,17 +43,9 @@ fn main() {
                 let _ = unsafe { GetWindowRect(hwnd, &mut frame) };
                 let wn_size = frame.bottom - frame.top;
 
-                if wn_size != 0 {
-                    let space = if kt_size > wn_size + ad_size {
-                        kt_size - wn_size - ad_size
-                    } else {
-                        0
-                    };
-
-                    if space + wn_size + ad_size <= kt_size {
-                        unsafe {
-                            SetWindowPos(hwnd, HWND(0), 0, 0, frame.right - frame.left, wn_size + ad_size + 1, SWP_NOZORDER | SWP_NOMOVE);
-                        }
+                if wn_size != 0 && kt_size > wn_size + ad_size {
+                    unsafe {
+                        SetWindowPos(hwnd, HWND(0), 0, 0, frame.right - frame.left, wn_size + ad_size + 1, SWP_NOZORDER | SWP_NOMOVE);
                     }
                 }
             }
