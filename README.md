@@ -7,6 +7,7 @@ Simple & lightweight ad-remover for kakaotalk pc client, written in Rust
 ## Download
 
 - You can get latest builds at [release page](https://github.com/ACK72/Pure-Kakao/releases/latest)
+- If your version of Kakaotalk is 4.0.0 or later, use the latest version; if earlier, use version 0.1.1.
 
 ## Limitations
 
