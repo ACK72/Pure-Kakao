@@ -6,30 +6,39 @@ use windows::{
 };
 
 fn main() {
+    let title = w!("카카오톡");
+    
     loop {
-        let _ = unsafe { EnumWindows(Some(check), LPARAM(0)) };
+        let handle = unsafe { FindWindowW(PCWSTR::null(), title) };
+        
+        if handle == HWND(0) {
+            thread::sleep(Duration::from_secs(1));
+            continue;
+        }
+
+        let _ = unsafe { EnumWindows(Some(check), LPARAM(handle.0)) };
         thread::sleep(Duration::from_millis(100));
     }
 }
 
-unsafe extern "system" fn check(hwnd: HWND, _: LPARAM) -> BOOL {
-    let cwnd = FindWindowExA(hwnd, HWND(0), s!("BannerAdContainer"), PCSTR::null());
+unsafe extern "system" fn check(hwnd: HWND, param: LPARAM) -> BOOL {
+    let handle = HWND(param.0);
+    if handle == GetParent(hwnd) {
+        let cwnd = FindWindowExA(hwnd, HWND(0), s!("BannerAdContainer"), PCSTR::null());
 
-    if cwnd != HWND(0) {
-        hide(hwnd);
-        return FALSE;
+        if cwnd != HWND(0) {
+            hide(hwnd, handle);
+            return FALSE;
+        }
     }
 
     TRUE
 }
 
-fn hide(ad_hwnd: HWND) {
-    let title = w!("카카오톡");
-    
+fn hide(ad_hwnd: HWND, handle: HWND) {
     let mut hwnd = HWND(0);
     let mut frame = RECT::default();
 
-    let handle = unsafe { FindWindowW(PCWSTR::null(), title) };
     let _ = unsafe { GetWindowRect(handle, &mut frame) };
     let kt_size = frame.bottom - frame.top;
 

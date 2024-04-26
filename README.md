@@ -11,4 +11,4 @@ Simple & lightweight ad-remover for kakaotalk pc client, written in Rust
 
 ## Limitations
 
-- Not support blocking pop-up ads, as these are rare, and it requires "expensive" search loop
+- Do not remove pop-up ads, as these are rare, and it requires "expensive" search loop
