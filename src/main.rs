@@ -1,8 +1,10 @@
+#![windows_subsystem = "windows"]
+
 use std::{
     thread, time::Duration
 };
 use windows::{
-    core::*, Win32::Foundation::*, Win32::UI::WindowsAndMessaging::*
+    core::*, Win32::Foundation::*, Win32::Graphics::Gdi::*, Win32::UI::WindowsAndMessaging::*
 };
 
 fn main() {
@@ -17,7 +19,7 @@ fn main() {
         }
 
         let _ = unsafe { EnumWindows(Some(check), LPARAM(handle.0)) };
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(15));
     }
 }
 
@@ -66,6 +68,8 @@ fn hide(ad_hwnd: HWND, handle: HWND) {
             if wn_size != 0 && kt_size > wn_size + ad_size {
                 let _ = unsafe { SetWindowPos(hwnd, HWND(0), 0, 0, frame.right - frame.left, wn_size + ad_size + 1, SWP_NOZORDER | SWP_NOMOVE) };
             }
+
+			let _ = unsafe { RedrawWindow(hwnd, None, HRGN(0), RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN) };
         }
     }
 }
