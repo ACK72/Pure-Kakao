@@ -1,4 +1,4 @@
-# Pure-Kakao ![Generic badge](https://img.shields.io/badge/version-0.1.5-green.svg)
+# Pure-Kakao ![Generic badge](https://img.shields.io/badge/version-0.1.6-green.svg)
 
 Simple & lightweight ad-remover for kakaotalk pc client, written in Rust
 
