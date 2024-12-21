@@ -11,25 +11,26 @@ fn main() {
     let title = w!("카카오톡");
     
     loop {
-        let handle = unsafe { FindWindowW(PCWSTR::null(), title) };
+        let pwnd = unsafe { FindWindowW(PCWSTR::null(), title) };
         
-        if handle == HWND(0) {
+        if pwnd == HWND(0) {
             thread::sleep(Duration::from_secs(1));
             continue;
         }
 
-        let _ = unsafe { EnumWindows(Some(check), LPARAM(handle.0)) };
+        _ = unsafe { EnumWindows(Some(check), LPARAM(pwnd.0)) };
         thread::sleep(Duration::from_millis(15));
     }
 }
 
 unsafe extern "system" fn check(hwnd: HWND, param: LPARAM) -> BOOL {
-    let handle = HWND(param.0);
-    if handle == GetParent(hwnd) {
-        let cwnd = FindWindowExA(hwnd, HWND(0), s!("BannerAdContainer"), PCSTR::null());
+    let pwnd = HWND(param.0);
+	
+    if pwnd == GetParent(hwnd) {
+        let cwnd = GetWindow(hwnd, GW_CHILD);
 
         if cwnd != HWND(0) {
-            hide(hwnd, handle);
+            hide(hwnd, pwnd);
             return FALSE;
         }
     }
@@ -37,39 +38,41 @@ unsafe extern "system" fn check(hwnd: HWND, param: LPARAM) -> BOOL {
     TRUE
 }
 
-fn hide(ad_hwnd: HWND, handle: HWND) {
-    let mut hwnd = HWND(0);
+fn hide(hwnd: HWND, pwnd: HWND) {
+    let mut cwnd = HWND(0);
     let mut frame = RECT::default();
 
-    let _ = unsafe { GetWindowRect(handle, &mut frame) };
+    _ = unsafe { GetWindowRect(pwnd, &mut frame) };
     let kt_size = frame.bottom - frame.top;
 
-    let _ = unsafe { GetWindowRect(ad_hwnd, &mut frame) };
+    _ = unsafe { GetWindowRect(hwnd, &mut frame) };
     let ad_size = frame.bottom - frame.top;
 
-    let _ = unsafe { ShowWindow(ad_hwnd, SW_HIDE) };
+    _ = unsafe { ShowWindow(hwnd, SW_HIDE) };
 
     loop {
-        hwnd = unsafe { FindWindowExA(handle, hwnd, PCSTR::null(), PCSTR::null()) };
+        cwnd = unsafe { FindWindowExA(pwnd, cwnd, PCSTR::null(), PCSTR::null()) };
 
-        if hwnd == HWND(0) {
+        if cwnd == HWND(0) {
             break;
         }
 
-        let size = unsafe { GetWindowTextLengthW(hwnd) } as usize;
+        let size = unsafe { GetWindowTextLengthW(cwnd) } as usize;
         let mut caption_vec = vec![0 as u16; size];
-        let _ = unsafe { GetWindowTextW(hwnd, &mut caption_vec) };
+        _ = unsafe { GetWindowTextW(cwnd, &mut caption_vec) };
         let caption = String::from_utf16(&mut caption_vec).unwrap();
 
         if caption.starts_with("OnlineMainView") || caption.starts_with("LockModeView") {
-            let _ = unsafe { GetWindowRect(hwnd, &mut frame) };
+            _ = unsafe { GetWindowRect(cwnd, &mut frame) };
             let wn_size = frame.bottom - frame.top;
 
             if wn_size != 0 && kt_size > wn_size + ad_size {
-                let _ = unsafe { SetWindowPos(hwnd, HWND(0), 0, 0, frame.right - frame.left, wn_size + ad_size + 1, SWP_NOZORDER | SWP_NOMOVE) };
+                _ = unsafe { SetWindowPos(cwnd, HWND(0), 0, 0, frame.right - frame.left, wn_size + ad_size + 1, SWP_NOZORDER | SWP_NOMOVE) };
             }
 
-			let _ = unsafe { RedrawWindow(hwnd, None, HRGN(0), RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN) };
-        }
+			_ = unsafe { RedrawWindow(cwnd, None, HRGN(0), RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN) };
+		} else {
+			_ = unsafe { ShowWindow(cwnd, SW_HIDE) };
+		}
     }
 }
